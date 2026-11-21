@@ -1,4 +1,4 @@
-import { registrarCategoria, consultarCategoria } from "./categoria.service.js";
+import { registrarCategoria, consultarCategoria, actualizarCategoria, eliminarCategoria } from "./categoria.service.js";
 export async function registrarLaCategoria(req, res) {
     try {
         const respuesta = await registrarCategoria(req.body.nombre)
@@ -58,6 +58,52 @@ export async function consultarLasCategorias(req, res) {
         res.status(500).json({
             success: false,
             message: "Error al consultar categoria"
+        })
+    }
+}
+export async function actualizarLaCategoria(req, res) {
+    try {
+        const respuesta = await actualizarCategoria(req.body.nombre, req.body.nuevoNombre)
+        if(respuesta.success){
+            res.status(200).json({
+                success: true,
+                categoria: respuesta.categoria
+            })
+        }
+        else{
+            res.status(400).json({
+                success: false,
+                message: respuesta.message
+            })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            success: false,
+            message: "Error al actualizar categoria"
+        })
+    }
+}
+export async function eliminarLaCategoria(req, res) {
+    try {
+        const respuesta = await eliminarCategoria(req.body.nombre)
+        if(respuesta.success){
+            res.status(200).json({
+                success: true,
+                categorias: respuesta.categorias
+            })
+        }
+        else{
+            res.status(400).json({
+                success: false,
+                message: respuesta.message
+            })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            success: false,
+            message: "Error al eliminar categoria"
         })
     }
 }
