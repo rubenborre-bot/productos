@@ -107,7 +107,7 @@ export async function eliminarElProducto(req, res) {
         console.error(error)
         res.status(500).json({
             success: false,
-            message: "Error al eliminar categoria"
+            message: "Error al eliminar producto"
         })
     }
 }
