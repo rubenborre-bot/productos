@@ -31,19 +31,21 @@ Antes de ejecutar el proyecto se debe contar con:
 
 ## 4. Instalación del proyecto
 
-Clonar el repositorio:
+Paso 1. Clonar el repositorio
+
+Reemplazar `URL_DEL_REPOSITORIO` por la dirección del repositorio de GitHub.
 
 ```bash
 git clone URL_DEL_REPOSITORIO
 ```
 
-Ingresar a la carpeta del proyecto:
+Paso 2. Ingresar a la carpeta del proyecto
 
 ```bash
 cd productos
 ```
 
-Instalar las dependencias:
+Paso 3. Instalar las dependencias
 
 ```bash
 npm install
@@ -66,15 +68,17 @@ La base de datos utilizada por la aplicación es `productosDB`.
 
 ## 6. Ejecución del proyecto
 
-Para ejecutar el servidor en modo desarrollo:
+Paso 1. Iniciar el servidor
 
-```bash
+Desde la carpeta del proyecto, ejecutar:
+
+```powershell
 npm run dev
 ```
 
-Para ejecutar el servidor normalmente:
+Para ejecutar el servidor normalmente, también se puede utilizar:
 
-```bash
+```powershell
 npm start
 ```
 
@@ -86,7 +90,9 @@ El servidor queda disponible en:
 http://localhost:3000
 ```
 
-Si se utiliza otro puerto, se debe reemplazar el número 3000 por el configurado en `.env`.
+Importante: No cerrar la terminal donde se está ejecutando el servidor.
+
+Para realizar las pruebas de los endpoints, abrir una segunda ventana de PowerShell.
 
 ## 7. Endpoints de la API
 
@@ -112,77 +118,192 @@ Si se utiliza otro puerto, se debe reemplazar el número 3000 por el configurado
 
 ## 8. Pruebas de los endpoints con cURL
 
-Los siguientes ejemplos utilizan `curl.exe` y una dirección local con el puerto 3000. Se pueden ejecutar desde PowerShell o desde una terminal compatible con cURL.
+Los siguientes ejemplos están preparados para ejecutarse en Windows PowerShell 5.1, utilizando `curl.exe`.
 
-### 8.1. Categorías
+Para evitar problemas con las comillas del JSON en PowerShell, las solicitudes POST, PATCH y DELETE utilizan un archivo temporal que contiene los datos que se enviarán a la API.
 
-Registrar una categoría
+### 8.1. Preparación para las pruebas
 
-```bash
-curl.exe -X POST http://localhost:3000/categorias/registrar-categoria -H "Content-Type: application/json" -d "{\"nombre\":\"Tecnologia\"}"
+Paso 1. Abrir una segunda ventana de PowerShell.
+
+El servidor debe continuar ejecutándose en la primera ventana.
+
+Paso 2. Ingresar a la carpeta del proyecto.
+
+```powershell
+cd C:\Users\NOMBRE_USUARIO\RUTA\productos
 ```
 
-Consultar todas las categorías
+Si el proyecto se encuentra en otra ubicación, reemplazar la ruta por la correspondiente.
 
-```bash
-curl.exe http://localhost:3000/categorias/consultar-categoria
+Paso 3. Definir la ubicación del archivo temporal.
+
+Ejecutar una sola vez:
+
+```powershell
+$archivo = Join-Path $env:TEMP "body.json"
 ```
 
-Consultar una categoría por nombre
+Esta variable permitirá utilizar el mismo archivo temporal durante todas las pruebas.
 
-```bash
-curl.exe "http://localhost:3000/categorias/consultar-categoria?nombre=Tecnologia"
+Importante: Los comandos que crean o modifican el archivo JSON y los comandos `curl.exe` deben ejecutarse en el orden indicado. No se debe ejecutar el comando de cURL antes de crear el contenido del archivo.
+
+### 8.2. Pruebas de categorías
+
+Las siguientes operaciones deben ejecutarse en orden.
+
+1. Registrar una categoría — POST
+
+Primero, crear el contenido del archivo JSON. Copiar y ejecutar:
+
+```powershell
+'{"nombre":"tecnologia"}' | Set-Content -Path $archivo -Encoding ASCII
 ```
 
-Actualizar una categoría
+Después, ejecutar la solicitud con cURL:
 
-```bash
-curl.exe -X PATCH http://localhost:3000/categorias/actualizar-categoria -H "Content-Type: application/json" -d "{\"nombre\":\"Tecnologia\",\"nuevoNombre\":\"Informatica\"}"
+```powershell
+curl.exe -X POST "http://localhost:3000/categorias/registrar-categoria" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
-Eliminar una categoría
+2. Consultar todas las categorías — GET
 
-```bash
-curl.exe -X DELETE http://localhost:3000/categorias/eliminar-categoria -H "Content-Type: application/json" -d "{\"nombre\":\"Informatica\"}"
+```powershell
+curl.exe "http://localhost:3000/categorias/consultar-categoria"
 ```
 
-### 8.2. Productos
+3. Consultar una categoría por nombre — GET
 
-Registrar un producto
-
-```bash
-curl.exe -X POST http://localhost:3000/productos/registrar-producto -H "Content-Type: application/json" -d "{\"nombre\":\"Portatil Lenovo\",\"nombreCategoria\":\"Tecnologia\",\"nombreCar\":\"RAM\",\"valorCar\":\"16 GB\",\"precio\":2500000,\"stock\":10}"
+```powershell
+curl.exe "http://localhost:3000/categorias/consultar-categoria?nombre=tecnologia"
 ```
 
-Consultar todos los productos
+4. Actualizar una categoría — PATCH
 
-```bash
-curl.exe http://localhost:3000/productos/consultar-producto
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"tecnologia","nuevoNombre":"informatica"}' | Set-Content -Path $archivo -Encoding ASCII
 ```
 
-Consultar un producto por nombre
+Después, ejecutar la solicitud con cURL:
 
-```bash
-curl.exe "http://localhost:3000/productos/consultar-producto?nombre=Portatil%20Lenovo"
+```powershell
+curl.exe -X PATCH "http://localhost:3000/categorias/actualizar-categoria" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
-Actualizar los datos generales de un producto
+5. Eliminar una categoría — DELETE
 
-```bash
-curl.exe -X PATCH http://localhost:3000/productos/actualizar-producto -H "Content-Type: application/json" -d "{\"nombre\":\"Portatil Lenovo\",\"nuevoNombre\":\"Portatil Lenovo Ideapad\",\"nuevaCategoria\":\"Tecnologia\",\"nuevoPrecio\":2800000,\"nuevoStock\":8}"
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"informatica"}' | Set-Content -Path $archivo -Encoding ASCII
 ```
 
-Actualizar una característica de un producto
+Después, ejecutar la solicitud con cURL:
 
-```bash
-curl.exe -X PATCH http://localhost:3000/productos/actualizar-producto -H "Content-Type: application/json" -d "{\"nombre\":\"Portatil Lenovo Ideapad\",\"nuevoNombre\":\"Portatil Lenovo Ideapad\",\"nuevaCategoria\":\"Tecnologia\",\"nombreCar\":\"ram\",\"nuevoNombreCar\":\"memoria ram\",\"nuevoValorCar\":\"32 GB\",\"nuevoPrecio\":2800000,\"nuevoStock\":8}"
+```powershell
+curl.exe -X DELETE "http://localhost:3000/categorias/eliminar-categoria" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
-Eliminar un producto
+### 8.3. Pruebas de productos
 
-```bash
-curl.exe -X DELETE http://localhost:3000/productos/eliminar-producto -H "Content-Type: application/json" -d "{\"nombre\":\"Portatil Lenovo Ideapad\"}"
+Para registrar un producto, primero debe existir la categoría a la que estará asociado.
+
+Por este motivo, se debe registrar nuevamente la categoría `tecnologia` antes de continuar con las pruebas de productos.
+
+1. Registrar la categoría necesaria
+
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"tecnologia"}' | Set-Content -Path $archivo -Encoding ASCII
 ```
+
+Después, ejecutar:
+
+```powershell
+curl.exe -X POST "http://localhost:3000/categorias/registrar-categoria" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+2. Registrar un producto — POST
+
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"mouse-gamer","nombreCategoria":"tecnologia","nombreCar":"color","valorCar":"negro","precio":150000,"stock":10}' | Set-Content -Path $archivo -Encoding ASCII
+```
+
+Después, ejecutar la solicitud con cURL:
+
+```powershell
+curl.exe -X POST "http://localhost:3000/productos/registrar-producto" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+3. Consultar todos los productos — GET**
+
+```powershell
+curl.exe "http://localhost:3000/productos/consultar-producto"
+```
+
+4. Consultar un producto por nombre — GET**
+
+```powershell
+curl.exe "http://localhost:3000/productos/consultar-producto?nombre=mouse-gamer"
+```
+
+5. Actualizar los datos generales de un producto — PATCH**
+
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"mouse-gamer","nuevoNombre":"mouse-gamer-pro","nuevaCategoria":"tecnologia","nuevoPrecio":180000,"nuevoStock":15}' | Set-Content -Path $archivo -Encoding ASCII
+```
+
+Después, ejecutar la solicitud con cURL:
+
+```powershell
+curl.exe -X PATCH "http://localhost:3000/productos/actualizar-producto" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+6. Actualizar una característica del producto — PATCH**
+
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"mouse-gamer-pro","nuevoNombre":"mouse-gamer-pro","nuevaCategoria":"tecnologia","nombreCar":"color","nuevoNombreCar":"color","nuevoValorCar":"azul","nuevoPrecio":180000,"nuevoStock":15}' | Set-Content -Path $archivo -Encoding ASCII
+```
+
+Después, ejecutar la solicitud con cURL:
+
+```powershell
+curl.exe -X PATCH "http://localhost:3000/productos/actualizar-producto" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+7. Eliminar un producto — DELETE**
+
+Primero, crear el contenido del archivo JSON:
+
+```powershell
+'{"nombre":"mouse-gamer-pro"}' | Set-Content -Path $archivo -Encoding ASCII
+```
+
+Después, ejecutar la solicitud con cURL:
+
+```powershell
+curl.exe -X DELETE "http://localhost:3000/productos/eliminar-producto" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+### 8.4. Consideraciones sobre las pruebas
+
+- Los comandos utilizan `curl.exe`.
+- El archivo JSON temporal se almacena en la carpeta temporal de Windows.
+- La variable `$archivo` debe definirse antes de realizar las pruebas.
+- Las solicitudes GET no necesitan enviar un cuerpo JSON.
+- Las solicitudes POST, PATCH y DELETE incluyen el encabezado `Content-Type: application/json`.
+- El servidor debe permanecer ejecutándose durante las pruebas.
+- Se recomienda seguir el orden indicado para evitar errores relacionados con las categorías asociadas a los productos.
+- Las pruebas utilizan nombres y datos de ejemplo. Si se ejecutan nuevamente, puede ser necesario modificar o eliminar los registros anteriores para evitar duplicados.
 
 ## 9. Estructura del proyecto
 
@@ -236,6 +357,8 @@ La API utiliza respuestas HTTP para indicar el resultado de las operaciones:
 
 Las respuestas se entregan en formato JSON e incluyen información sobre el resultado de las operaciones.
 
-## 11. Consideraciones
+## 11. Consideraciones finales
 
 - Las solicitudes POST, PATCH y DELETE que reciben datos deben enviarse con el encabezado `Content-Type: application/json`.
+- Es necesario tener MongoDB disponible antes de iniciar el servidor.
+- Para ejecutar las pruebas se requiere que el servidor esté iniciado y que la conexión con la base de datos esté funcionando correctamente.
